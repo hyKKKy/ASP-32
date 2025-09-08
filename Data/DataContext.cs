@@ -8,6 +8,8 @@ namespace ASP_32.Data
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles {  get; set; }
         public DbSet<UserAccess> UserAccesses { get; set; }
+        public DbSet<ProductGroup> ProductGroups { get; set; }
+        public DbSet<Product> Product { get; set; }
 
         public DataContext(DbContextOptions options) : base(options) 
         { }
@@ -15,6 +17,20 @@ namespace ASP_32.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Seed
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Group)
+                .WithMany(pg => pg.Products)
+                .HasForeignKey(p => p.GroupId);
+
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => p.Slug)
+                .IsUnique();
+
+            modelBuilder.Entity<ProductGroup>()
+                .HasIndex(p => p.Slug)
+                .IsUnique();
+
             modelBuilder.Entity<UserRole>()
                 .HasData([
                 new UserRole()

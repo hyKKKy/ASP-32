@@ -1,4 +1,6 @@
-﻿namespace ASP_32.Data.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace ASP_32.Data.Entities
 {
     public class User
     {
@@ -9,7 +11,7 @@
         public DateTime     RegisteredAt    { get; set; }
         public DateTime?    DeleteAt        {  get; set; }
 
-
+        [JsonIgnore]
         public ICollection<UserAccess> Accesses { get; set; } = [];
     }
 }

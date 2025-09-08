@@ -1,4 +1,6 @@
-using ASP_32.Data;
+﻿using ASP_32.Data;
+using ASP_32.Middleware.Auth;
+using ASP_32.Services.Auth;
 using ASP_32.Services.Kdf;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +12,16 @@ builder.Services.AddSingleton<IKdfService, PbKdf1Service>();
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")
 ));
+
+builder.Services.AddDistributedMemoryCache(); 
+builder.Services.AddSession(options => { 
+    options.IdleTimeout = TimeSpan.FromMinutes(10); 
+    options.Cookie.HttpOnly = true; 
+    options.Cookie.IsEssential = true; 
+});
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuthService, SessionAuthService>();
+
 
 var app = builder.Build();
 
@@ -25,7 +37,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();
-
+app.UseSession();
+app.UseSessionAuth();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
@@ -36,3 +49,14 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+
+/* Null-Safety
+ * x! Null-Checking - скорочена форма для вийнятку (NullReferenceEx)
+ * x ?? y ?? w Null-Coalescence - повертаяє перший аргумент, що не є Null
+ * x?.y Null-Forgiving (Null-Propagation) - повертає NULL, якщо x == null, інакше x.y
+ *  x ?? =y Null-Initialization якщо x == null, то здійснюється присвоєння,
+                                інакше інструкція ігнорується
+
+        
+ */

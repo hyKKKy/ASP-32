@@ -1,17 +1,26 @@
 ﻿using ASP_32.Data;
+using ASP_32.Services.Auth;
 using ASP_32.Services.Kdf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace ASP_32.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(DataContext dataContext, IKdfService kdfService) : ControllerBase
+    public class UserController(
+        DataContext dataContext, 
+        IKdfService kdfService,
+        IAuthService authService
+        ) : ControllerBase
     {
         private readonly DataContext _dataContext = dataContext;
 
         private readonly IKdfService _kdfService = kdfService;
+
+        private readonly IAuthService _authService = authService;
 
         [HttpGet]
         public object Authenticate()
@@ -31,6 +40,9 @@ namespace ASP_32.Controllers.Api
 
             var userAccess = _dataContext
                 .UserAccesses
+                .AsNoTracking()
+                .Include(ua => ua.User)
+                .Include(ua => ua.Role)
                 .FirstOrDefault(ua => ua.Login == login);
 
             if (userAccess == null) 
@@ -45,6 +57,12 @@ namespace ASP_32.Controllers.Api
                 return new { Status = "Credentials rejected." };
             }
 
+            //HttpContext.Session.SetString(
+            //    "UserController:Authenticate",
+            //    JsonSerializer.Serialize(userAccess)
+            //);
+
+            _authService.SetAuth(userAccess);
             return userAccess;
         }
 

@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -28,12 +30,37 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
-                    <div>
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#authModal">  
-                            <i class="bi bi-door-open"></i>
-                        </button>
-                    </div>
+                    @if(Context.User.Identity?.IsAuthenticated ?? false)
+                    {
+                        String name = Context.User.Claims
+
+                        .First(c => c.Type == ClaimTypes.Name).Value;
+
+                        bool isAdmin = Context.User.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.Role)
+                        ?.Value == "Admin";
+
+                        <div>
+                            @if (isAdmin)
+                            {
+                                <a asp-action="Admin"><i class="bi bi-speedometer2"></i></a>
+                            }
+                            <b title="@name">@(name.ToUpper()[0])</b>
+
+                            <a href="?logout" class="btn btn-outline-secondary">
+                                <i class="bi bi-box-arrow-right "></i>
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#authModal">
+                                <i class="bi bi-door-open"></i>
+                            </button>
+                        </div>
+                    }
                 </div>
             </div>
         </nav>
@@ -84,3 +111,16 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+
+@*
+    Скорочені форми посилань (локальні посилання)
+    дано: ми знаходимось на сторінці https://localhost/Home/Privacy
+    Які повні посилання у скорочених форм:
+    href               url
+    "Page"             https://localhost/Home/Page
+    "/Page"            https://localhost/Page
+    "//Page"           https://Page
+    "#Page"            https://localhost/Home/Privacy#Page
+    "?Page"            https://localhost/Home/Privacy?Page
+*@

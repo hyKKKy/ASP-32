@@ -1,7 +1,8 @@
-using System.Diagnostics;
 using ASP_32.Models;
 using ASP_32.Services.Kdf;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Security.Claims;
 
 namespace ASP_32.Controllers
 {
@@ -20,6 +21,20 @@ namespace ASP_32.Controllers
         {
             ViewData["dk"] = _kdfService.Dk("Admin", "4506C746-8FDD-4586-9BF4-95D6933C3B4F");
             return View();
+        }
+
+        public IActionResult Admin()
+        {
+            bool isAdmin = HttpContext.User.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.Role)
+                        ?.Value == "Admin";
+            if (isAdmin) { 
+                return View();
+            }
+            else
+            {
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         public IActionResult Privacy()

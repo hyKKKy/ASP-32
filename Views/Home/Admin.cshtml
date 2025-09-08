@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "Admin Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Dashboard (панель адміністратора)</h1>
+</div>
+
+<div>
+    <h2>Товарні групи</h2>
+    <form>
+        <div class="row">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="product-name-addon"><i class="bi bi-bag-check"></i></span>
+                    <input name="product-name" type="text" class="form-control" placeholder="Назва"
+                           aria-label="Назва" aria-describedby="product-name-addon">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="product-description-addon"><i class="bi bi-card-text"></i></span>
+                    <input name="product-description" type="text" class="form-control" placeholder="Назва"
+                           aria-label="Опис" aria-describedby="product-description-addon">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="product-slug-addon"><i class="bi bi-link"></i></span>
+                    <input name="product-slug" type="text" class="form-control" placeholder="Назва"
+                           aria-label="Посилання" aria-describedby="product-slug-addon">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group mb-3"><input type="file" class="form-control" id="inputGroupFile02">
+                       <label class="input-group-text" for="inputGroupFile02">Upload</label></div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-outline-primary">Додати</button>
+        </div>
+    </form>
+</div>
+
