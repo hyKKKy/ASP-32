@@ -2,6 +2,7 @@
 using ASP_32.Middleware.Auth;
 using ASP_32.Services.Auth;
 using ASP_32.Services.Kdf;
+using ASP_32.Services.Storage;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,7 @@ builder.Services.AddSession(options => {
     options.Cookie.IsEssential = true; 
 });
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IStorageService, DiskStorageService>();
 builder.Services.AddScoped<IAuthService, SessionAuthService>();
 
 
