@@ -4,7 +4,15 @@ using ASP_32.Services.Kdf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Text.Json;
+
+/* Д.З. Реалізувати повний цикл перевірок даних, що передаються
+             * для автентифікації
+             * - заголовок починається з 'Basic '
+             * - credentials успішно декодуються з Base64
+             * - userPass ділиться на дві частини (може не містити ":")
+             */
 
 namespace ASP_32.Controllers.Api
 {
@@ -31,9 +39,37 @@ namespace ASP_32.Controllers.Api
                 HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return new { Status = "Authorization Header Required" };
             }
-            String credentials = header[6..];
-            String userPass = System.Text.Encoding.UTF8.GetString(
-                Convert.FromBase64String(credentials));
+            
+            //ДЗ -1
+            String[] splitParts = header.Split(" ", 2);
+            if (splitParts[0] != "Basic")
+            {
+                HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return new { Status = "Credentials rejected!" };
+            }
+
+            String credentials =    // 'Basic ' - length = 6
+                header[6..];        // QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+
+            //ДЗ -2
+            String userPass; 
+            try 
+            {
+                String tmp = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(credentials));
+                userPass = tmp;
+            }
+            catch(Exception ex)
+            {
+                HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return new { Status = "Invalid Base64 decoding", ex };
+                }
+
+            //ДЗ -3
+            if (!userPass.Contains(':')) 
+            {
+                HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return new { Status = "Credentials rejected*" };
+            }
             String[] parts = userPass.Split(':', 2);
             String login = parts[0];
             String password = parts[1];

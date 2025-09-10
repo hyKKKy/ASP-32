@@ -31,20 +31,18 @@ namespace ASP_32.Middleware.Auth
                             [
                                new Claim(ClaimTypes.Sid, userAccess.Id.ToString()), 
                                new Claim(ClaimTypes.Name, userAccess.User.Name),
-                               new Claim(ClaimTypes.Role, userAccess.RoleId)
+                               new Claim(ClaimTypes.Role, userAccess.RoleId),
+                               new Claim(ClaimTypes.Email, userAccess.User.Email)
                             ],
                             nameof(SessionAuthMiddleware)
                         )
                     );
                 }
-                
                     
             }
             await _next(context);
         }
     }
-
-
 
     public static class SessionAuthMiddlewareExtensions
     { 
@@ -55,3 +53,8 @@ namespace ASP_32.Middleware.Auth
         } 
     }
 }
+
+/* Д.З. Включити у склад авторизаційних даних відомості про E-mail
+ * користувача. Додати до навігаційної панелі Layout кнопку-посилання
+ * "надіслати лист" з переходом на "mailto:..."
+ */
