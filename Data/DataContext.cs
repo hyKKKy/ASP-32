@@ -9,7 +9,7 @@ namespace ASP_32.Data
         public DbSet<UserRole> UserRoles {  get; set; }
         public DbSet<UserAccess> UserAccesses { get; set; }
         public DbSet<ProductGroup> ProductGroups { get; set; }
-        public DbSet<Product> Product { get; set; }
+        public DbSet<Product> Products { get; set; }
 
         public DataContext(DbContextOptions options) : base(options) 
         { }

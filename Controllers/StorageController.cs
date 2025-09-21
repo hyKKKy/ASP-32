@@ -13,9 +13,8 @@ namespace ASP_32.Controllers
             {
                 ".jpg" => "image/jpeg",
                 ".jpeg" => "image/jpeg",
-                ".png" => "image/png,",
-                _ => "applicatrion/octet-stream"
-
+                ".png" => "image/png",
+                _ => "application/octet-stream"
             };
             var bytes = _storageService.Load(id);
             return bytes == null ? NotFound() : File(bytes, mimeType);

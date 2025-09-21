@@ -1,10 +1,15 @@
-﻿@{
+﻿@model ASP_32.Models.Home.HomeIndexViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Крамниця</h1>
 </div>
 
-@ViewData["dk"]
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+    @foreach (var grp in Model.ProductGroups)
+    {
+        @Html.DisplayFor(m => grp)
+    }
+</div>
