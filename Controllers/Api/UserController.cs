@@ -17,12 +17,14 @@ namespace ASP_32.Controllers.Api
             DataContext dataContext, 
             IKdfService kdfService,
             IAuthService authService,
+            IConfiguration configuration,
             DataAccessor dataAccessor ) : ControllerBase
     {
         private readonly DataContext _dataContext = dataContext;
         private readonly DataAccessor _dataAccessor = dataAccessor;
         private readonly IKdfService _kdfService = kdfService;
         private readonly IAuthService _authService = authService;
+        private readonly IConfiguration _configuration = configuration;
 
         [HttpGet("jwt")]
 
@@ -78,8 +80,18 @@ namespace ASP_32.Controllers.Api
             String payloadJson = JsonSerializer.Serialize(payloadObject);
             String payload64 = Base64UrlTextEncoder.Encode(System.Text.Encoding.UTF8.GetBytes(payloadJson));
 
-            responce.Data = payload64;
+            String secret = _configuration.GetSection("Jwt").GetSection("Secret").Value
+                ?? throw new KeyNotFoundException("Not found configuration 'Jwt.Secret'");
 
+            String tokenBody = header64 + '.' + payload64;
+
+            String signature = Base64UrlTextEncoder.Encode(
+                System.Security.Cryptography.HMACSHA256.HashData(
+                System.Text.Encoding.UTF8.GetBytes(secret),
+                System.Text.Encoding.UTF8.GetBytes(tokenBody)
+                ));
+
+            responce.Data = tokenBody + '.' + signature;
 
             return responce;
         }
@@ -111,12 +123,7 @@ namespace ASP_32.Controllers.Api
                 HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return new { Status = "Authorization Header Required" };
             }
-            /* Д.З. Реалізувати повний цикл перевірок даних, що передаються
-             * для автентифікації
-             * - заголовок починається з 'Basic '
-             * - credentials успішно декодуються з Base64
-             * - userPass ділиться на дві частини (може не містити ":")
-             */
+
             String credentials =    // 'Basic ' - length = 6
                 header[6..];        // QWxhZGRpbjpvcGVuIHNlc2FtZQ==
             String userPass =       // Aladdin:open sesame
@@ -145,11 +152,7 @@ namespace ASP_32.Controllers.Api
                 HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return new { Status = "Credentials rejected." };
             }
-            // зберігаємо у сесії факт успішної автентифікації
-            // HttpContext.Session.SetString(
-            //     "UserController::Authenticate",
-            //     JsonSerializer.Serialize(userAccess)
-            // );
+
             _authService.SetAuth(userAccess);
             return userAccess;
         }
