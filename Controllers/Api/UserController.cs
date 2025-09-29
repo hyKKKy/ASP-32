@@ -115,46 +115,81 @@ namespace ASP_32.Controllers.Api
             return(login, password);
         }
 
-        public object Authenticate()
+        public RestResponce Authenticate()
         {
+            RestResponce restResponce = new()
+            {
+                Meta = new RestMeta
+                {
+                    Service = "ASP 32. AuthService",
+                    Url = HttpContext.Request.Path,
+                    Cache = 0,
+                    Manipulations = new[] { "AUTH" },
+                    DataType = "UserAccess"
+                }
+            };
+
             String? header = HttpContext.Request.Headers.Authorization;
             if (header == null)      // Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
             {
-                HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return new { Status = "Authorization Header Required" };
+                restResponce.Status = RestStatus.Status401;
+                return restResponce;
             }
-
-            String credentials =    // 'Basic ' - length = 6
+            try
+            {
+                String credentials =    // 'Basic ' - length = 6
                 header[6..];        // QWxhZGRpbjpvcGVuIHNlc2FtZQ==
-            String userPass =       // Aladdin:open sesame
-                System.Text.Encoding.UTF8.GetString(
-                    Convert.FromBase64String(credentials));
+                String userPass =       // Aladdin:open sesame
+                    System.Text.Encoding.UTF8.GetString(
+                        Convert.FromBase64String(credentials));
 
-            String[] parts = userPass.Split(':', 2);
-            String login = parts[0];
-            String password = parts[1];
+                String[] parts = userPass.Split(':', 2);
+                String login = parts[0];
+                String password = parts[1];
 
-            var userAccess = _dataContext
-                .UserAccesses
-                .AsNoTracking()
-                .Include(ua => ua.User)
-                .Include(ua => ua.Role)
-                .FirstOrDefault(ua => ua.Login == login);
+                var userAccess = _dataContext
+                    .UserAccesses
+                    .AsNoTracking()
+                    .Include(ua => ua.User)
+                    .Include(ua => ua.Role)
+                    .FirstOrDefault(ua => ua.Login == login);
 
-            if (userAccess == null)
-            {
-                HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return new { Status = "Credentials rejected" };
+                if (userAccess == null)
+                {
+                    restResponce.Status = RestStatus.Status401;
+                    restResponce.Data = new { Error = "Credentials rejected." };
+                    return restResponce;
+                }
+                String dk = _kdfService.Dk(password, userAccess.Salt);
+                if (dk != userAccess.Dk)
+                {
+                    restResponce.Status = RestStatus.Status401;
+                    restResponce.Data = new { Error = "Credentials rejected" };
+                    return restResponce;
+                }
+
+                _authService.SetAuth(userAccess);
+                restResponce.Status = RestStatus.Status200;
+                restResponce.Data = new
+                {
+                    Id = userAccess.UserId,       
+                    Login = userAccess.Login,
+                    User = userAccess.User?.Name,
+                    Role = new
+                    {
+                        Id = userAccess.Role.Id,
+                        Description = userAccess.Role.Description
+                    }
+                };
+                return restResponce;
             }
-            String dk = _kdfService.Dk(password, userAccess.Salt);
-            if(dk != userAccess.Dk)
+            catch (Exception ex)
             {
-                HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return new { Status = "Credentials rejected." };
+                restResponce.Status = RestStatus.Status400;
+                restResponce.Data = new { Error = ex.Message };
+                return restResponce;
             }
 
-            _authService.SetAuth(userAccess);
-            return userAccess;
         }
 
         [HttpPost]
