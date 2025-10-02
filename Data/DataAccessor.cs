@@ -9,6 +9,41 @@ namespace ASP_32.Data
         private readonly DataContext _dataContext = dataContext;
         private readonly IKdfService _kdfService = kdfService;
 
+        public bool UpdateCartItem(String userId, String cartItemId, int cnt)
+        {
+            Guid userGuid = Guid.Parse(userId);
+            Guid cartItemGuid = Guid.Parse(cartItemId);
+            Cart? cart = GetActiveCart(userId);
+            if (cart == null) return false;
+            CartItem? cartItem = cart.CartItems.
+                FirstOrDefault(ci => ci.Id == cartItemGuid);
+            if (cartItem == null) return false;
+            int newQuantity = cartItem.Quantity + cnt;
+            if (newQuantity <= 0 || newQuantity > cartItem.Product.Stock)
+            {
+                return false;
+            }
+            cartItem.Quantity = newQuantity;
+            CalcPrice(cart);
+            _dataContext.SaveChanges();
+            return true;
+        }
+
+        public bool DeleteCartItem(String userId, String cartItemId)
+        {
+            Guid userGuid = Guid.Parse(userId);
+            Guid cartItemGuid = Guid.Parse(cartItemId);
+            Cart? cart = GetActiveCart(userId);
+            if (cart == null) return false;
+            CartItem? cartItem = cart.CartItems.
+                FirstOrDefault(ci => ci.Id == cartItemGuid);
+            if (cartItem == null) return false;
+            _dataContext.CartItems.Remove(cartItem);
+            CalcPrice(cart);
+            _dataContext.SaveChanges();
+            return true;
+        }
+
 
         public void AddToCart(String userId, String productId)
         {
@@ -46,7 +81,7 @@ namespace ASP_32.Data
                     Product = _dataContext.Products.Find(productGuid)!
                 };
                 _dataContext.CartItems.Add(cartItem);
-                cart.CartItems.Add(cartItem);
+                //cart.CartItems.Add(cartItem);
             }
             else
             {

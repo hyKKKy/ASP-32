@@ -27,7 +27,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, SessionAuthService>();
 builder.Services.AddSingleton<IStorageService, DiskStorageService>();
 
-builder.Services.AddCors(options => { options.AddDefaultPolicy(policy => { policy.AllowAnyOrigin().AllowAnyHeader(); ; }); });
+builder.Services.AddCors(options => { options.AddDefaultPolicy(policy => { policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); ; }); });
 
 var app = builder.Build();
 

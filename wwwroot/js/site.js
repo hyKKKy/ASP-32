@@ -34,7 +34,7 @@ document.addEventListener('submit', e => {
             }
         }).then(r => r.json())
             .then(j => {
-                if (typeof j.status == 'undefined') {
+                if (j.status.isOk) {
                     window.location.reload();
                 }
             })
@@ -82,7 +82,7 @@ document.addEventListener('submit', e => {
             .then(r => r.json().then(j => ({ status: r.status, body: j })))
             .then(({ status, body }) => {
                 if (status === 200) {
-                    alert(body.status);
+                    alert(body.data.name);
                     form.reset();
                 } else if (status === 400) {
                     const errors = body.errors;

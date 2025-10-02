@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ASP_32.Data.Entities
 {
-    public class CartItem
+    public record CartItem
     {
         public Guid Id { get; set; }
         public Guid CartId { get; set; }
@@ -13,7 +14,7 @@ namespace ASP_32.Data.Entities
         public int Quantity { get; set; } = 1;
         public Guid? DiscountId { get; set; }
 
-
+        [JsonIgnore]
         public Cart Cart { get; set; } = null!;
         public Product Product { get; set; } = null!;
     }

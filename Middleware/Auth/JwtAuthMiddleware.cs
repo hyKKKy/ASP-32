@@ -21,7 +21,7 @@ namespace ASP_32.Middleware.Auth
             String authHeader = context.Request.Headers.Authorization.ToString();
             if (!String.IsNullOrEmpty(authHeader))
             {
-                String scheme = "Bearer";
+                String scheme = "Bearer ";
                 if(authHeader.StartsWith(scheme))
                 {
                     String? errorMessage = null;

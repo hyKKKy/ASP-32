@@ -61,12 +61,25 @@ namespace ASP_32.Controllers.Api
         }
 
         [HttpPost]
-        public object AddGroup(AdminGroupFormModel model)
+        public RestResponce AddGroup(AdminGroupFormModel model)
         {
+
+            RestResponce restResponce = new()
+            {
+                Meta = new()
+                {
+                    Manipulations = ["POST"],
+                    Cache = 0,
+                    Service = "Shop API: add product group",
+                    DataType = "json/object"
+                },
+                Data = null
+            };
             // Валідація
             if (!ModelState.IsValid)
             {
-                return new { ModelState };
+                restResponce.Status = RestStatus.Status400;
+                return restResponce;
             }
 
             bool exist =  _dataContext.ProductGroups.Any(g => g.Name == model.Name);
@@ -74,7 +87,8 @@ namespace ASP_32.Controllers.Api
             if (exist)
             {
                 ModelState.AddModelError("group-name", "Група з такою назвою вже створена");
-                return ValidationProblem(ModelState);
+                restResponce.Status = RestStatus.Status500;
+                return restResponce;
             }
 
             _dataContext.ProductGroups.Add(new Data.Entities.ProductGroup
@@ -88,11 +102,15 @@ namespace ASP_32.Controllers.Api
             try
             {
                 _dataContext.SaveChanges();
-                return new { status = "OK", code = 200 };
+                restResponce.Status = RestStatus.Status200;
+                restResponce.Data = new { Name = model.Name };
+                return restResponce;
             }
             catch (Exception ex)
             {
-                return new { status = ex.Message, code = 500 };
+                restResponce.Status = RestStatus.Status500;
+                restResponce.Data = ex.Message;
+                return restResponce;
             }
         }
     }

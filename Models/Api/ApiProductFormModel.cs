@@ -17,11 +17,9 @@ namespace ASP_32.Models.Api
         [FromForm(Name = "product-description")]
         public String? Description { get; set; } = null!;
 
-        [Required(ErrorMessage = "Поле є обов'язкове.")]
         [FromForm(Name = "product-slug")]
         public String? Slug { get; set; } = null!;
 
-        [Required(ErrorMessage = "Поле є обов'язкове.")]
         [FromForm(Name = "product-img")]
         public IFormFile? Image { get; set; } = null!;
 

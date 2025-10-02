@@ -76,17 +76,42 @@ namespace ASP_32.Controllers.Api
         }
 
         [HttpPost]
-        public object AddProduct(ApiProductFormModel model)
+        public RestResponce AddProduct(ApiProductFormModel model)
         {
+            RestResponce restResponce = new()
+            {
+                Meta = new()
+                {
+                    Manipulations = ["POST"],
+                    Cache = 60 * 60,
+                    Service = "Shop API: add product",
+                    DataType = "null",
+                    Opt = new Dictionary<String, Object>
+                    {
+                        { "Name", model.Name },
+                        { "Description", model.Description },
+                        { "Slug", model.Slug },
+                        { "Price", model.Price },
+                        { "Stock", model.Stock },
+                        { "GroupId", model.GroupId },
+                        { "Image", model.Image != null ? model.Image.FileName : "null" }
+                    },
+                },
+                Data = null
+            };
+
             #region Валідація моделі
             Guid groupGuid;
             try { groupGuid = Guid.Parse(model.GroupId); }
-            catch { return new { status = "Invalid GroupId", code = 400 }; }
+            catch { restResponce.Status = RestStatus.Status400;
+                return restResponce;
+            }
             #endregion
 
             if (!ModelState.IsValid)
             {
-                return new { ModelState };
+                restResponce.Status = RestStatus.Status400;
+                return restResponce;
             }
 
             _dataContext.Products.Add(new()
@@ -105,11 +130,15 @@ namespace ASP_32.Controllers.Api
             try
             {
                 _dataContext.SaveChanges();
-                return new { status = "OK", code = 200 };
+                restResponce.Status = RestStatus.Status200;
+                restResponce.Data = new { Name = model.Name };
+                return restResponce;
             }
             catch (Exception ex)
             {
-                return new { status = ex.Message, code = 500 };
+                restResponce.Status = RestStatus.Status500;
+                restResponce.Data = ex.Message;
+                return restResponce;
             }
         }
     }

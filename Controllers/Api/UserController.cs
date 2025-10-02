@@ -172,14 +172,10 @@ namespace ASP_32.Controllers.Api
                 restResponce.Status = RestStatus.Status200;
                 restResponce.Data = new
                 {
-                    Id = userAccess.UserId,       
+                    Id = userAccess.UserId,
                     Login = userAccess.Login,
                     User = userAccess.User?.Name,
-                    Role = new
-                    {
-                        Id = userAccess.Role.Id,
-                        Description = userAccess.Role.Description
-                    }
+                    Role = userAccess.Role.Id
                 };
                 return restResponce;
             }
@@ -192,16 +188,42 @@ namespace ASP_32.Controllers.Api
 
         }
 
-        [HttpPost]
-        public object SignUp()
+
+                [HttpPost]
+        public RestResponce SignUp()
         {
-            return new { Status = "SignUp Works" };
+            RestResponce restResponce = new() {
+                
+                Meta = new RestMeta
+                {
+                    Service = "ASP 32. AuthService",
+                    Url = HttpContext.Request.Path,
+                    Cache = 0,
+                    Manipulations = new[] { "SIGNUP" },
+                    DataType = "SingUp works"
+                }
+
+            };
+            return restResponce;
         }
 
         [HttpPost("admin")]  // POST /api/user/admin
-        public object SignUpAdmin()
+        public RestResponce SignUpAdmin()
         {
-            return new { Status = "SignUpAdmin Works" };
+            RestResponce restResponce = new()
+            {
+
+                Meta = new RestMeta
+                {
+                    Service = "ASP 32. AuthService",
+                    Url = HttpContext.Request.Path,
+                    Cache = 0,
+                    Manipulations = new[] { "SIGNUP" },
+                    DataType = "SingUpAdmin works"
+                }
+
+            };
+            return restResponce;
         }
     }
 }
