@@ -13,14 +13,12 @@ namespace ASP_32.Controllers.Api
 {
     [Route("api/user")]
     [ApiController]
-    public class UserController(
-            DataContext dataContext, 
+    public class UserController( 
             IKdfService kdfService,
             IAuthService authService,
             IConfiguration configuration,
             DataAccessor dataAccessor ) : ControllerBase
     {
-        private readonly DataContext _dataContext = dataContext;
         private readonly DataAccessor _dataAccessor = dataAccessor;
         private readonly IKdfService _kdfService = kdfService;
         private readonly IAuthService _authService = authService;
@@ -147,26 +145,8 @@ namespace ASP_32.Controllers.Api
                 String login = parts[0];
                 String password = parts[1];
 
-                var userAccess = _dataContext
-                    .UserAccesses
-                    .AsNoTracking()
-                    .Include(ua => ua.User)
-                    .Include(ua => ua.Role)
-                    .FirstOrDefault(ua => ua.Login == login);
-
-                if (userAccess == null)
-                {
-                    restResponce.Status = RestStatus.Status401;
-                    restResponce.Data = new { Error = "Credentials rejected." };
-                    return restResponce;
-                }
-                String dk = _kdfService.Dk(password, userAccess.Salt);
-                if (dk != userAccess.Dk)
-                {
-                    restResponce.Status = RestStatus.Status401;
-                    restResponce.Data = new { Error = "Credentials rejected" };
-                    return restResponce;
-                }
+                var userAccess = _dataAccessor.Authenticate(login, password)
+                    ?? throw new Exception("Credintials rejected.");
 
                 _authService.SetAuth(userAccess);
                 restResponce.Status = RestStatus.Status200;
