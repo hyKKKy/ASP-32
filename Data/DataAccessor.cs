@@ -9,6 +9,26 @@ namespace ASP_32.Data
         private readonly DataContext _dataContext = dataContext;
         private readonly IKdfService _kdfService = kdfService;
 
+
+
+        public Feedback? AddFeedback(String userId, String productId, String comment, int rate)
+        {
+            Guid userGuid = Guid.Parse(userId);
+            Guid productGuid = Guid.Parse(productId);
+            var feedback = new Feedback()
+            {
+                Id = Guid.NewGuid(),
+                UserId = userGuid,
+                ProductId = productGuid,
+                Comment = comment,
+                Rate = rate,
+                CreatedAt = DateTime.Now
+            };
+            _dataContext.Feedbacks.Add(feedback);
+            _dataContext.SaveChanges();
+            return feedback;
+        }
+
         public bool UpdateCartItem(String userId, String cartItemId, int cnt)
         {
             Guid userGuid = Guid.Parse(userId);
@@ -153,6 +173,26 @@ namespace ASP_32.Data
                 ImageUrl =
                     $"/STORAGE/Item/{product.ImageUrl ?? "no-image.jpg"}"
             };
+        }
+
+        public Product? AddProduct(String groupId, String name, String description, String slug, String imageUrl, int stock, double price)
+        {
+            Guid groupGuid = Guid.Parse(groupId);
+            var product = new Product()
+            {
+                Id = Guid.NewGuid(),
+                GroupId = groupGuid,
+                Name = name,
+                Description = description,
+                Slug = slug,
+                ImageUrl = imageUrl,
+                Stock = stock,
+                Price = price,
+                DeletedAt = null
+            };
+            _dataContext.Products.Add(product);
+            _dataContext.SaveChanges();
+            return product;
         }
 
         public ProductGroup? GetProductGroupBySlug(String slug)

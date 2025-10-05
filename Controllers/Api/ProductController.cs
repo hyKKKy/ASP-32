@@ -16,16 +16,15 @@ namespace ASP_32.Controllers.Api
     {
         private readonly IStorageService _storageService;
         private readonly DataAccessor _dataAccessor;
-        private readonly DataContext _dataContext;
+
 
         public ProductController(
             IStorageService storageService,
-            DataAccessor dataAccessor,
-            DataContext dataContext)
+            DataAccessor dataAccessor)
         {
             _storageService = storageService;
             _dataAccessor = dataAccessor;
-            _dataContext = dataContext;
+            
         }
 
         [HttpPost("feedback/{id}")]
@@ -60,16 +59,12 @@ namespace ASP_32.Controllers.Api
                 restResponce.Status = RestStatus.Status404;
                 return restResponce;
             }
-            _dataContext.Feedbacks.Add(new()
-            { 
-            Id = Guid.NewGuid(),
-            ProductId = product.Id,
-            UserId = userId,
-            Comment = comment,
-            Rate = rate,
-            CreatedAt = DateTime.Now
-            });
-            _dataContext.SaveChanges();
+            _dataAccessor.AddFeedback(
+                userId == null ? Guid.Empty.ToString() : userId.ToString(),
+                product.Id.ToString(),
+                comment ?? "",
+                rate == null ? 0 : (int)rate
+                );
 
             return restResponce;
             
@@ -114,22 +109,18 @@ namespace ASP_32.Controllers.Api
                 return restResponce;
             }
 
-            _dataContext.Products.Add(new()
-            {
-                Id = Guid.NewGuid(),
-                GroupId = groupGuid,
-                Name = model.Name,
-                Description = model.Description,
-                Slug = model.Slug,
-                Price = model.Price,
-                Stock = model.Stock,
-                ImageUrl = model.Image == null ? null :
-                    _storageService.Save(model.Image),
-            });
+            _dataAccessor.AddProduct(
+                model.GroupId,
+                model.Name,
+                model.Description ?? "",
+                model.Slug ?? "",
+                model.Image != null ? model.Image.FileName : "no-image.jpg",
+                model.Stock,
+                model.Price
+                );
 
             try
             {
-                _dataContext.SaveChanges();
                 restResponce.Status = RestStatus.Status200;
                 restResponce.Data = new { Name = model.Name };
                 return restResponce;
